@@ -3,8 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import butter, filtfilt
 from numpy.fft import rfft, rfftfreq
+import os 
 
-FICHIER = "UnicornRecorder_29_04_2026_15_26_180.csv"
+# FICHIER = "UnicornRecorder_29_04_2026_15_26_180.csv"
+DOSSIER = "enregistrements_recorder" # Nom du dossur
+
+fichiers = [f for f in os.listdir(DOSSIER) if f.endswith(".csv")]
+print("Fichiers trouvés :", fichiers)
 FENETRE = 5 
 FREQ = 250 # Vu que chaque ligne = 1/250 secondes
 
@@ -16,11 +21,10 @@ def appliquer_filtre(signal, freq_min, freq_max, freq_echantillonnage):
     return signal_filtre
 
 #-- LECTURE DU FICHIER -- #
-df = pd.read_csv(FICHIER)
+df = pd.read_csv(os.path.join(DOSSIER, fichiers[0]))
 df = df.iloc[1250:] #On obtiens 1250 parce que le casque enregistre 250 mesures par seconde (250 *5 = 1250), on va ignorer les 5 premières secondes vu que le casque n'est pas stable au début
 df = df.reset_index(drop=True) #On réinitialise les index pour que la première ligne soit à l'index 0 
 
-print ("Fichier :", FICHIER)
 print("Duree : ", len(df)/FREQ, "secondes")
 
 # -- RECUPERATION ET FILTRAGE DES CANAUX OCCIPITAUX -- #
@@ -54,11 +58,23 @@ for i in range(nb_fenetres):
     transformee = (abs(rfft(fenetre_ch6))+ abs(rfft(fenetre_ch7)) + abs(rfft(fenetre_ch8)))/3
     frequences = rfftfreq(taille_fenetre, 1/FREQ) #On peut prendre n'importe quelle fenêtre pour calculer les fréquences, elles ont toutes la même longueur
 
+
+    # Boucle pour les fenêtres
     for fc, label in freqs_cibles:
        idx = np.argmin(np.abs(frequences - fc)) # Index le plus proche de fc
-       puissances[fc].append(transformee[idx])
-       print(f"Fenetre {i+1} ({i*FENETRE}s-{(i+1)*FENETRE}s) | {label}({fc}Hz) = {transformee[idx]:.1f}")
 
+       # Signal c'est à dire amplitude à la fréquence cible
+       amplitude_signal = transformee[idx]
+
+       # Pour prendre le bruit on pfera la moyenne de 4 valeurs voisines : 2 de chaque côté de la valeur en excluant bien sûr la valeur cible
+       voisins = transformee[[idx - 2, idx-1, idx+1, idx+2]]
+       bruit_moyen = np.mean(voisins)
+
+       # Calcul du SNR
+       snr = amplitude_signal / bruit_moyen if bruit_moyen > 0 else 0 
+       puissances[fc].append(snr) 
+
+       print(f"Fenetre {i+1} ({i*FENETRE}s-{(i+1)*FENETRE}s) | {label}({fc}Hz) => SNR = {snr:.2f}")
 
 # -- AFFICHAGE DES DONNEES -- #
 temps_fenetres = [i * FENETRE + FENETRE/2 for i in range(nb_fenetres)]
@@ -66,14 +82,15 @@ fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (14, 10))
 
 # Graphique 1 :  
 for fc, label in freqs_cibles :
-    plt.plot(temps_fenetres, puissances[fc], color=couleurs_cibles[fc], label=f"{label} ({fc}Hz)", linewidth=2, marker='o')
-ax1.set_tittle("Puissance aux fréquences cibles dans le temps")
+    ax1.plot(temps_fenetres, puissances[fc], color=couleurs_cibles[fc], label=f"{label} ({fc}Hz)", linewidth=2, marker='o')
+ax1.set_title("SNR aux fréquences cibles dans le temps")
 ax1.set_xlabel("Temps(secondes)")   
-ax1.set_ylabel("Puissance FFT")
+ax1.set_ylabel("SNR (signal /bruit)")
+ax1.axhline(y=1.0, color='black', linewidth=1, linestyle='--', label='Seuil bruit (SNR=1)')
 ax1.legend()
 ax1.grid(True)
 
-'''# Graphique 2 : FFT globale 
+# Graphique 2 : FFT globale 
 ch_moyen = (ch6 + ch7 + ch8) / 3
 transformee_globale = abs(rfft(ch_moyen))
 frequences_globales = rfftfreq(len(ch_moyen), 1/FREQ)
@@ -81,12 +98,12 @@ masque = (frequences_globales >= 5) & (frequences_globales <=30)
 
 ax2.plot(frequences_globales[masque], transformee_globale[masque], color = "gray", linewidth = 0.8) 
 for fc, label in freqs_cibles:
-    ax2.axvline(x = fc, cooloor = couleurs_cibles[fc], linewidth = 1.5, linestyle = "--")
+    ax2.axvline(x = fc, color = couleurs_cibles[fc], linewidth = 1.5, linestyle = "--")
     ax2.text(fc + 0.2, ax2.get_ylim()[1] * 0.85, label, color=couleurs_cibles[fc], fontsize=8)
 ax2.set_title("Spectre FFT global - moyenne Ch6 Ch7 Ch8")
 ax2.set_xlabel("Fréquence (Hz)")
 ax2.set_ylabel("Puissance")
 ax2.grid(True)   
-'''
+
 plt.tight_layout()
 plt.show()
