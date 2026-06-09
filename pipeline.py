@@ -76,6 +76,14 @@ for i in range(nb_fenetres):
 
        print(f"Fenetre {i+1} ({i*FENETRE}s-{(i+1)*FENETRE}s) | {label}({fc}Hz) => SNR = {snr:.2f}")
 
+# Pour afficher le pourcentage du SNR pour chaque flèche 
+print("\n=== QUALITE DU SIGNAL ===")
+for fc, label in freqs_cibles:
+    snrs = puissances[fc]
+    nb_au_dessus = sum(1 for s in snrs if s > 1.5)
+    pourcentage = (nb_au_dessus / len(snrs)) * 100
+    print(f"{label} ({fc}Hz) : {pourcentage:.1f}% des fenêtres avec SNR > 1.5")
+
 # -- AFFICHAGE DES DONNEES -- #
 temps_fenetres = [i * FENETRE + FENETRE/2 for i in range(nb_fenetres)]
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (14, 10))
@@ -97,9 +105,9 @@ frequences_globales = rfftfreq(len(ch_moyen), 1/FREQ)
 masque = (frequences_globales >= 5) & (frequences_globales <=30)
 
 ax2.plot(frequences_globales[masque], transformee_globale[masque], color = "gray", linewidth = 0.8) 
-for fc, label in freqs_cibles:
+'''for fc, label in freqs_cibles:
     ax2.axvline(x = fc, color = couleurs_cibles[fc], linewidth = 1.5, linestyle = "--")
-    ax2.text(fc + 0.2, ax2.get_ylim()[1] * 0.85, label, color=couleurs_cibles[fc], fontsize=8)
+    ax2.text(fc + 0.2, ax2.get_ylim()[1] * 0.85, label, color=couleurs_cibles[fc], fontsize=8)'''
 ax2.set_title("Spectre FFT global - moyenne Ch6 Ch7 Ch8")
 ax2.set_xlabel("Fréquence (Hz)")
 ax2.set_ylabel("Puissance")
