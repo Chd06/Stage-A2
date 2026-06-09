@@ -6,7 +6,7 @@ from numpy.fft import rfft, rfftfreq
 import os 
 
 # FICHIER = "UnicornRecorder_29_04_2026_15_26_180.csv"
-DOSSIER = "enregistrements_recorder" # Nom du dossur
+DOSSIER = "enregistrements_recorder2" # Nom du dossier
 
 fichiers = [f for f in os.listdir(DOSSIER) if f.endswith(".csv")]
 print("Fichiers trouvés :", fichiers)
