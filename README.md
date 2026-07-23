@@ -207,8 +207,6 @@ The complete pipeline (stimulus → acquisition → signal processing → robot 
 
 **FFT (Fast Fourier Transform)**: Algorithm that converts a time-domain signal into its frequency components — the core of SSVEP detection.
 
----
-
 ## 📄 License
 
 This project was developed as part of an academic internship at Lab'CESI Lyon. All rights reserved.
