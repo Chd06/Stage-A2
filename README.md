@@ -1,6 +1,6 @@
 # 🧠 Neural Control of a Mobile Robotic Platform
 
-> **Proof of Concept** — Brain-Computer Interface (BCI) using SSVEP paradigm to control a TurtleBot robot via EEG signals.
+> **Proof of Concept** : Brain-Computer Interface (BCI) using SSVEP paradigm to control a TurtleBot robot via EEG signals.
 
 **Internship project** @ Lab'CESI Lyon (CESI Engineering School)  
 **Supervised by** Julien Coyne  
@@ -8,15 +8,22 @@
 
 ---
 
-## 📋 Overview
+## Overview
 
 This project explores the feasibility of controlling a mobile robot (TurtleBot under ROS) using a Brain-Computer Interface based on **Steady-State Visual Evoked Potentials (SSVEP)**.
 
-The principle: visual stimuli (arrows) flicker at different frequencies on screen. When the user focuses on one arrow, the brain synchronizes to that frequency — detectable via FFT analysis on occipital EEG electrodes. The detected direction is then sent as a command to the robot via a REST API.
+The principle: visual stimuli (arrows) flicker at different frequencies on screen. When the user focuses on one arrow, the brain synchronizes to that frequency detectable via an FFT analysis on occipital EEG electrodes. The detected direction is then sent as a command to the robot via a Flask API.
 
 ---
+## Key Concepts
 
-## 🏗️ System Architecture
+**SSVEP (Steady-State Visual Evoked Potentials)**: When a person fixates on a flickering visual stimulus, their visual cortex generates electrical activity at the same frequency as the flicker detectable via EEG on occipital electrodes.
+
+**SNR (Signal-to-Noise Ratio)**: Ratio of the FFT amplitude at the target frequency to the mean amplitude of neighboring frequency bins. SNR ≈ 1.0 = noise only; SNR > 1.5 = detectable signal; SNR > 2.0 = strong signal.
+
+**FFT (Fast Fourier Transform)**: Algorithm that converts a time-domain signal into its frequency components — the core of SSVEP detection.
+
+## System Architecture
 
 ```
 EEG Headset (Unicorn Hybrid Black)
@@ -38,7 +45,7 @@ TurtleBot (/cmd_vel topic)
 
 ---
 
-## 🛠️ Hardware & Environment
+## Hardware & Environment
 
 | Component | Details |
 |-----------|---------|
@@ -50,7 +57,7 @@ TurtleBot (/cmd_vel topic)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Stage-A2/
@@ -72,7 +79,7 @@ Stage-A2/
 
 ---
 
-## 🔧 Scripts Description
+##  Scripts Description
 
 ### `simulation.py`
 Pygame-based visual stimulus displaying 4 triangular arrows on a black background, each flickering at a different frequency at 120 FPS.
@@ -108,7 +115,7 @@ Offline analysis tool for recorded CSV files:
 
 ---
 
-## 📐 Signal Processing Pipeline
+## Signal Processing Pipeline
 
 ```
 Raw EEG signal
@@ -126,13 +133,13 @@ SNR computation at target frequencies
 Detection / Command
 ```
 
-**Why Butterworth?** It provides the flattest possible frequency response in the passband — no distortion or unwanted amplification of the frequencies of interest, unlike Chebyshev or elliptic filters.
+**Why Butterworth?** It provides the flattest possible frequency response in the passband without distortions or unwanted amplification of the frequencies of interest.
 
-**Why SNR instead of raw amplitude?** Raw amplitude varies with overall signal level (movement artifacts, contact quality). SNR normalizes by comparing the amplitude at the target frequency to its immediate neighbors in the spectrum — a value > 1.5 indicates a genuine peak above background noise.
+**Why SNR instead of raw amplitude?** Raw amplitude varies with overall signal level (movement artifacts, contact quality). SNR normalizes by comparing the amplitude at the target frequency to its immediate neighbors in the spectrum : a value > 1.5 indicates a genuine peak above background noise.
 
 ---
 
-## ⚙️ Installation & Requirements
+## Installation & Requirements
 
 ```bash
 pip install numpy scipy matplotlib pandas pygame
@@ -142,7 +149,7 @@ Additionally, the **Unicorn Python API** must be installed from the Unicorn Suit
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### 1. Run the visual stimulus
 ```bash
@@ -162,7 +169,7 @@ The script will list available CSV files in `enregistrements_recorder/` and let 
 
 ---
 
-## 📊 Key Parameters
+## Key Parameters
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
@@ -176,7 +183,7 @@ The script will list available CSV files in `enregistrements_recorder/` and let 
 
 ---
 
-## 📈 Results & Discussion
+## Results & Discussion
 
 The complete pipeline (stimulus → acquisition → signal processing → robot command) was successfully implemented and validated. However, **clear SSVEP responses were not consistently detected** in the recordings, with SNR values fluctuating randomly around 1.0 across recording sessions.
 
@@ -188,25 +195,17 @@ The complete pipeline (stimulus → acquisition → signal processing → robot 
 
 ---
 
-## 🔭 Future Work & Perspectives
+##  Future Work & Perspectives
 
 - **Test higher stimulation frequencies** (18–30 Hz) to avoid alpha band interference
-- **Implement CCA** (Canonical Correlation Analysis) — state-of-the-art SSVEP detection method, more robust than plain FFT
-- **User-specific calibration** — automatic SNR threshold and frequency tuning per user before each session
-- **Real-time signal quality dashboard** — display electrode contact quality and per-channel noise level
+- **Implement CCA** (Canonical Correlation Analysis) : state-of-the-art SSVEP detection method, more robust than plain FFT
+- **User-specific calibration** : automatic SNR threshold and frequency tuning per user before each session
+- **Real-time signal quality dashboard** : display electrode contact quality and per-channel noise level
 - **Explore alternative BCI paradigms**: P300 event-related potential, Motor Imagery (mu/beta rhythms), EOG-based eye blink detection
 - **Finalize robot integration** — re-enable Flask API commands once reliable detection is achieved
 
 ---
 
-## 📚 Key Concepts
-
-**SSVEP (Steady-State Visual Evoked Potentials)**: When a person fixates on a flickering visual stimulus, their visual cortex generates electrical activity at the same frequency as the flicker — detectable via EEG on occipital electrodes.
-
-**SNR (Signal-to-Noise Ratio)**: Ratio of the FFT amplitude at the target frequency to the mean amplitude of neighboring frequency bins. SNR ≈ 1.0 = noise only; SNR > 1.5 = detectable signal; SNR > 2.0 = strong signal.
-
-**FFT (Fast Fourier Transform)**: Algorithm that converts a time-domain signal into its frequency components — the core of SSVEP detection.
-
-## 📄 License
+## License
 
 This project was developed as part of an academic internship at Lab'CESI Lyon. All rights reserved.
