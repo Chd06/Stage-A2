@@ -62,7 +62,7 @@ TurtleBot (/cmd_vel topic)
 ```
 Stage-A2/
 │
-├── simulation.py              # Visual stimulus (Pygame) — flickering arrows
+├── simulation.py              # Visual stimulus (Pygame) with the flickering arrows
 ├── acquisition_live.py        # Live EEG acquisition & real-time detection
 ├── pipeline.py                # Offline CSV analysis with SNR computation
 ├── test_connexion.py          # Flask API connection test
