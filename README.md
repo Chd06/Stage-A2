@@ -21,7 +21,7 @@ The principle: visual stimuli (arrows) flicker at different frequencies on scree
 
 **SNR (Signal-to-Noise Ratio)**: Ratio of the FFT amplitude at the target frequency to the mean amplitude of neighboring frequency bins. SNR ≈ 1.0 = noise only; SNR > 1.5 = detectable signal; SNR > 2.0 = strong signal.
 
-**FFT (Fast Fourier Transform)**: Algorithm that converts a time-domain signal into its frequency components — the core of SSVEP detection.
+**FFT (Fast Fourier Transform)**: Algorithm that converts a time-domain signal into its frequency components that are the core of SSVEP detection.
 
 ## System Architecture
 
